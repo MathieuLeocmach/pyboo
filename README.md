@@ -5,7 +5,7 @@ Dependencies are numpy, scipy and numba. Tested with python 2.7 and python 3.5.
 
 Steinhardt's bond orientational order parameter is a popular method (>20k citations of the original paper) to identify local symmetries in an assembly of particles in 3D. It can be used in particle-based simulations (typically molecular dynamics, brownian dynamics, monte-carlo, etc.) or in particle-tracking experiments (colloids, granular materials) where the coordinates of all particles are known.
 
-## input
+## Input
 
 The present library takes as input a (N,3) array of float coordinates named `pos` and a (M,2) array of integers named `bonds` that defines the bond network. If `bonds` contains the couple (10,55) it means that there is a bond between the particles which coordinates can be found at `pos[10]` and `pos[55]`. The bonds are supposed unique and bidirectional, therefore if the bond (10,55) is in `bonds`, the bond (55,10) exists *implicitely* and should not be part of `bonds`.
 
@@ -14,7 +14,7 @@ The library is agnostic on how the bonds were determined. Possible choices are (
  - the k nearest neighbours of a particle,
  - Delaunay triangulation.
  
-Other libraries have very efficient implementations of theses methods. See for example `scipy.KDTree` for fast spatial query or `scipy.spatial.Delaunay`.
+Other libraries have very efficient implementations of theses methods. See for example `scipy.spatial.KDTree` for fast spatial query or `scipy.spatial.Delaunay`.
 
 ## Spherical harmonics
 
