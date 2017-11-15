@@ -214,7 +214,9 @@ def gG_l(pos, qlms, is_center, Nbins, maxdist):
      - qlms is a list of Nx(2l+1) arrays of boo coordinates for l-fold symmetry. l can be different for each item.
      - is_center is a N array of booleans. For example all particles further away than maxdist from any edge of the box.
      - Nbins is the number of bins along r
-     - maxdist is the maximum distance considered"""
+     - maxdist is the maximum distance considered.
+     
+     Periodic boundary conditions are not supported."""
     for qlm in qlms:
         assert len(pos) == len(qlm)
     assert len(is_center) == len(pos)
