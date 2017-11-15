@@ -20,11 +20,22 @@ import numpy as np
 from scipy.special import sph_harm
 from scipy.spatial import cKDTree as KDTree
 from numba import jit, vectorize, guvectorize
-from colloids import periodic
+from math import floor
 
 @vectorize#(['float64(complex128)', 'float32(complex64)'])
 def abs2(x):
+    """squared norm of a complex number"""
     return x.real**2 + x.imag**2
+    
+@vectorize(['float64(float64,float64,float64)'])
+def periodify(u,v,period=-1.0):
+    """Given two arrays of points in a d-dimentional space with periodic boundary conditions, find the shortest vector between each pair. period can be a float or an array of floats of length d. Negative periods indicate no periodicity in this dimension.
+    
+    Implemented using algorithm C4 of Deiters 2013 doi:10.1524/zpch.2013.0311"""
+    diff = v - u
+    if period <= 0:
+        return diff
+    return diff - period * floor(diff /period + 0.5)
         
 
 def cart2sph(cartesian):
@@ -62,12 +73,12 @@ def single_pos2qlm(pos, i, ngb_indices, l=6):
     vectors = pos[ngb_indices]-pos[i]
     return vect2Ylm(vectors, l).mean(-1)
     
-def bonds2qlm(pos, bonds, l=6, periods=-1):
+def bonds2qlm(pos, bonds, l=6, periods=-1.0):
     """Returns the qlm for every particle"""
     qlm = np.zeros((len(pos), l+1), np.complex128)
     #spherical harmonic coefficients for each bond
     Ylm = vect2Ylm(
-        periodic.periodify(
+        periodify(
             pos[bonds[:,0]],
             pos[bonds[:,1]],
             periods
