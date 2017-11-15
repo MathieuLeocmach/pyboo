@@ -13,6 +13,7 @@ The library is agnostic on how the bonds were determined. Possible choices are (
  - two particles closer than a maximum distance,
  - the k nearest neighbours of a particle,
  - Delaunay triangulation.
+ 
 Other libraries have very efficient implementations of theses methods. See for example `scipy.KDTree` for fast spatial query or `scipy.spatial.Delaunay`.
 
 ## Spherical harmonics
@@ -20,9 +21,13 @@ Other libraries have very efficient implementations of theses methods. See for e
 The 3D orientation of each bond can be projected on a base of spherical harmonics $Y_{\ell m}(\theta,\phi)$, where $\ell \geq 0$ indicates the order of symmetry, and $m$, with $-\ell \geq m \geq \ell$, indicates the orientation with respect to the referent set of orthonormal axes. Since our bonds are bidirectional $\ell$ is even. Averaging these coefficients over a set of bonds yields a measure of the symmetry of this set.
 
 For example the whole system is characterised by the coefficients 
+
 $$\bar{q}_{\ell m} = \frac{1}{M} \sum_{i,j} Y_{\ell m}(\theta_{ij},\phi_{ij})$$
+
 where the average is taken over all the bonds. More locally, each particle $i$ is characterised by the coefficients
+
 $$q_{\ell m}(i) = \frac{1}{N_i}\sum_{0}^{N_i} Y_{\ell m}(\theta_{ij},\phi_{ij})$$
+
 where there are $N_i$ bonds starting from $i$. We call the $q_{\ell m}$ coefficients the local tensorial bond orientational order parameter.
 
 The function `bonds2qlm(pos, bonds, l)` computes the $q_{\ell m}$ coefficients for the $\ell$-fold symetry. The extra parameter `periods` allows to do so in periodic boundary conditions.
@@ -31,14 +36,17 @@ The function `bonds2qlm(pos, bonds, l)` computes the $q_{\ell m}$ coefficients f
 
 The tensorial $q_{\ell m}$ coefficients are dependent of the orientation of the reference axis. That is why we have to compute quantities that are rotationally invarients:
  - the second order invarient indicates the strength of the $\ell$-fold symetry.
+
 $$q_\ell = \sqrt{\frac{4\pi}{2l+1} \sum_{m=-\ell}^{\ell} |q_{\ell m}|^2 }$$
  - the third order invarient allows to discriminate different types of $\ell$-fold symetric structures.
+
 $$w_\ell = \sum_{m_1+m_2+m_3=0} 
 			\left( \begin{array}{ccc}
 				\ell & \ell & \ell \\
 				m_1 & m_2 & m_3 
 			\end{array} \right)
 			q_{\ell m_1} q_{\ell m_2} q_{\ell m_3}$$
+
 where the term in brackets is the Wigner 3-j symbol. For example $w_6$ allows to disctiminate icosahedral structures, see Leocmach & Tanaka, Nature Com. (2012) doi: 10.1038/ncomms1974.
 
 Invarients can be computed respectively by `ql(qlm)` and `wl(qlm)`.
@@ -46,7 +54,9 @@ Invarients can be computed respectively by `ql(qlm)` and `wl(qlm)`.
 ## Coarse-graining
 
 It is possible to coarse-grain the tensorial bond orientational order to get more information about the second shell of neighbours and thus discriminate better crystal structures, see Lechner & Delago J. Chem. Phys. (2008) doi:10.1063/1.2977970:
+
 $$Q_{\ell m}(i) = \frac{1}{N_i+1}\left( q_{\ell m}(i) +  \sum_{j=0}^{N_i} q_{\ell m}(j)\right)$$
+
 here the central particle is included in the sum.
 
 Coarse-graining can be done with `coarsegrain_qlm(qlm, bonds, inside)`. The parameter `inside` is a (N) array of booleans indicating particles where the original $q_{\ell m}$ coefficients were truthfully determined. Counter examples (where `inside` takes the value `False`) are particles that were too close to one edge of the experimental window, so that some of their neighbours were not dectected, causing a incomplete bond set. Coarse-grained invariants $Q_\ell$ and $W_\ell$ can be computed in the same way by `ql(qlm)` and `wl(qlm)` respectively.
@@ -54,6 +64,7 @@ Coarse-graining can be done with `coarsegrain_qlm(qlm, bonds, inside)`. The para
 ## Cross product
 
 The similarity between the symetry and the orientation of two neighbourhoods can be estimated by the normalized scalar product
+
 $$s_\ell(i,j) = \frac{4\pi}{2\ell + 1} \sum_{m=-\ell}^{\ell} q_{\ell m}(i) q_{\ell m}^{*}(j)$$
 
 This quantity is the result of `boo_product(qlm1, qlm2)`.
@@ -61,6 +72,7 @@ This quantity is the result of `boo_product(qlm1, qlm2)`.
 Typical use: when $s_6(i,j)$ is larger than a threshold value (typically 0.7) the bond can be considered crystalline. A particle is considered crystalline when it has at least 7 crystalline bonds. See Auer & Frenkel, J.Chem.Phys. (2004) doi: 10.1063/1.1638740. This procedure is implemented in `x_particles(qlm, bonds)`.
 
 In a more continuous manner, the crystallinity parameter is defined as the average of the cross products over the neighbours, see Russo & Tanaka, Sci Rep. (2012) doi:10.1038/srep00505.
+
 $$C_\ell(i) = \frac{1}{N_i} \sum_{j=0}{N_i} s_\ell (i,j)$$
 
 Crystallinity parameter is computed by `crystallinity(qlm, bonds)`.
@@ -68,7 +80,9 @@ Crystallinity parameter is computed by `crystallinity(qlm, bonds)`.
 ## Spatial correlation
 
 To know how spatially extended is the local symmetry and orientation, one can look at the average cross product at a certain distance.
+
 $$g_\ell(r) = \frac{\sum_{i,j} s_\ell(i,j)\delta(r_{ij}-r)}{\sum_{i,j} \delta(r_{ij}-r)}$$
+
 where $\delta$ is a binning function equal to one between 0 and $dr$ and zero elsewhere.
 
 The function `gG_l(pos, qlms, is_center, Nbins, maxdist)` returns separately the numerator and denominator of the above expression to ease further averaging. `maxdist` is the maximum range to consider and `Nbins` the number of bins between 0 and `maxdist`. `qlms` is a list of bond orientational order coefficients that can have different values of $\ell$, some coarse-grained or not. `is_center` is a (N) array of boolean marking the particles that are further than maxdist from any edge of the experimental window in order to avoid edge effects.
