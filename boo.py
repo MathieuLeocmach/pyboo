@@ -96,6 +96,7 @@ def bonds2qlm(pos, bonds, l=6, periods=-1.0):
 def coarsegrain_qlm(qlm, bonds, inside):
     """Coarse grain the bond orientational order on the neighbourhood of a particle
     $$Q_{\ell m}(i) = \frac{1}{N_i+1}\left( q_{\ell m}(i) +  \sum_{j=0}^{N_i} q_{\ell m}(j)\right)$$
+    See Lechner & Delago J. Chem. Phys. (2008) doi:10.1063/1.2977970
     Returns Qlm and the mask of the valid particles
     """
     #Valid particles must be valid themselves have only valid neighbours
@@ -119,12 +120,15 @@ def coarsegrain_qlm(qlm, bonds, inside):
     #nopython=True
 )
 def boo_product(qlm1, qlm2, prod):
-    """Product between two qlm"""
+    """Product between two qlm
+    
+    $$s_\ell (i,j) = \frac{4\pi}{2\ell + 1}\sum_{m=-\ell}{\ell} q_{\ell m}(i) q_{\ell m}(j)^*$$"""
     l = qlm1.shape[0]-1
     prod[0] = (qlm1[0] * qlm2[0].conjugate()).real
     for i in range(1, len(qlm1)):
         prod[0] += 2 * (qlm1[i] * qlm2[i].conjugate()).real
     prod[0] *= 4*np.pi/(2*l+1)
+    
     
 @jit(nopython=True)
 def ql(qlm):
@@ -171,7 +175,34 @@ def wl(qlm):
                 w += get_w3j(l, np.array([m1, m2, m3])) * (get_qlm(qlm, m1) * get_qlm(qlm, m2) * get_qlm(qlm, m3)).real
     return w
     
+def x_bonds(qlm, bonds, threshold=0.7):
+    """Which bonds are crystalline? If the cross product of their qlm is larger than the threshold."""
+    return bonds[
+        boo_product(qlm[bonds[:,0]], qlm[bonds[:,0]]) > threshold
+    ]
 
+def x_particles(qlm, bonds, value_thr=0.7, nb_thr=7):
+    """Which particles are crystalline? If they have more than nb_thr crystalline bonds."""
+    xb = x_bonds(qlm, bonds, threshold=value_thr)
+    nb = np.zeros(len(qlm), int)
+    np.add.at(nb, xb.ravel(), 1)
+    return nb > nb_thr
+    
+def crystallinity(qlm, bonds):
+    """Crystallinity parameter, see Russo & Tanaka, Sci Rep. (2012) doi:10.1038/srep00505.
+    
+    $$C_\ell(i) = \frac{1}{N_i} \sum_{j=0}{N_i} s_\ell (i,j)$$"""
+    #cross product for all bonds
+    bv = boo.boo_product(qlm[bonds[:,0]], qlm[bonds[:,0]])
+    #count number or neighbours
+    nb = np.zeros(len(qlm), int)
+    np.add.at(nb, bonds.ravel(), 1)
+    #sum cross product over bonds for each particle
+    c = np.zeros(len(qlm))
+    np.add.at(c, bonds[:,0], bv)
+    np.add.at(c, bonds[:,1], bv)
+    #mean
+    return c/np.maximum(1, nb)
 
 def gG_l(pos, qlms, is_center, Nbins, maxdist):
     """Spatial correlation of the qlms (non normalized).
