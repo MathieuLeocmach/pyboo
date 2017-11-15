@@ -16,7 +16,7 @@ def test_ico():
     qlm = bonds2qlm(pos_ico, bonds_ico)
     assert ql(qlm)[0] == pytest.approx(0.66332495807107972)
     assert wl(qlm)[0] == pytest.approx(-0.052131352806275739)
-    assert ql(qlm)[0] == pytest.approx(sqrt(boo_product(qlm,qlm)[0]))
+    assert ql(qlm)[0] == pytest.approx(sqrt(product(qlm,qlm)[0]))
     
 pos_fcc = np.array([[0,0,0],
     [1,1,0], [1,-1,0], [-1,1,0], [-1,-1,0],
@@ -28,4 +28,4 @@ def test_fcc():
     qlm = bonds2qlm(pos_fcc, bonds_ico)
     assert ql(qlm)[0] == pytest.approx(0.57452425971406984)
     assert wl(qlm)[0] == pytest.approx(-0.0026260383340077592)
-    assert ql(qlm)[0] == pytest.approx(sqrt(boo_product(qlm,qlm)[0]))
+    assert ql(qlm)[0] == pytest.approx(sqrt(product(qlm,qlm)[0]))

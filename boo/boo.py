@@ -119,7 +119,7 @@ def coarsegrain_qlm(qlm, bonds, inside):
     '(n),(n)->()', 
     #nopython=True
 )
-def boo_product(qlm1, qlm2, prod):
+def product(qlm1, qlm2, prod):
     """Product between two qlm
     
     $$s_\ell (i,j) = \frac{4\pi}{2\ell + 1}\sum_{m=-\ell}{\ell} q_{\ell m}(i) q_{\ell m}(j)^*$$"""
@@ -178,7 +178,7 @@ def wl(qlm):
 def x_bonds(qlm, bonds, threshold=0.7):
     """Which bonds are crystalline? If the cross product of their qlm is larger than the threshold."""
     return bonds[
-        boo_product(qlm[bonds[:,0]], qlm[bonds[:,0]]) > threshold
+        product(qlm[bonds[:,0]], qlm[bonds[:,0]]) > threshold
     ]
 
 def x_particles(qlm, bonds, value_thr=0.7, nb_thr=7):
@@ -193,7 +193,7 @@ def crystallinity(qlm, bonds):
     
     $$C_\ell(i) = \frac{1}{N_i} \sum_{j=0}{N_i} s_\ell (i,j)$$"""
     #cross product for all bonds
-    bv = boo.boo_product(qlm[bonds[:,0]], qlm[bonds[:,0]])
+    bv = product(qlm[bonds[:,0]], qlm[bonds[:,0]])
     #count number or neighbours
     nb = np.zeros(len(qlm), int)
     np.add.at(nb, bonds.ravel(), 1)
@@ -241,7 +241,7 @@ def gG_l(pos, qlms, is_center, Nbins, maxdist):
     #binning of boo cross products
     pqQs = np.empty((len(rs), len(qlms)))
     for it, qlm in enumerate(qlms):
-        pqQs[:,it] = boo_product(qlm[query['i']], qlm[query['j']])
+        pqQs[:,it] = product(qlm[query['i']], qlm[query['j']])
     np.add.at(hqQ, rs, pqQs)
     return hqQ, g
 
