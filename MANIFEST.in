@@ -1,1 +1,2 @@
 include *.md LICENCE
+recursive-include boo/examples *.ipynb *.xyz
