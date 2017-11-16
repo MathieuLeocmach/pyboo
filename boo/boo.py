@@ -196,6 +196,7 @@ def crystallinity(qlm, bonds):
     $$C_\ell(i) = \frac{1}{N_i} \sum_{j=0}{N_i} s_\ell (i,j)$$"""
     #cross product for all bonds
     bv = product(qlm[bonds[:,0]], qlm[bonds[:,0]])
+    bv /= (ql(qlm[bonds[:,0]]) * ql(qlm[bonds[:,1]]))
     #count number or neighbours
     nb = np.zeros(len(qlm), int)
     np.add.at(nb, bonds.ravel(), 1)
@@ -223,7 +224,7 @@ def gG_l(pos, qlms, is_center, Nbins, maxdist):
         assert len(pos) == len(qlm)
     assert len(is_center) == len(pos)
     #conversion factor between indices and bins
-    l2r = Nbins/maxdist
+    l2r = (Nbins-1)/maxdist
     #result containers
     hqQ = np.zeros((Nbins, len(qlms)))
     g = np.zeros(Nbins, int)
