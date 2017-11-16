@@ -224,10 +224,11 @@ def gG_l(pos, qlms, is_center, Nbins, maxdist):
         assert len(pos) == len(qlm)
     assert len(is_center) == len(pos)
     #conversion factor between indices and bins
-    l2r = (Nbins-1)/maxdist
+    l2r = Nbins/maxdist
     #result containers
-    hqQ = np.zeros((Nbins, len(qlms)))
-    g = np.zeros(Nbins, int)
+    #an additional bin for the case where the distance is exactly equal to maxdist
+    hqQ = np.zeros((Nbins+1, len(qlms)))
+    g = np.zeros(Nbins+1, int)
     #spatial indexing
     tree = KDTree(pos, 12)
     centertree = KDTree(pos[is_center], 12)
@@ -246,7 +247,7 @@ def gG_l(pos, qlms, is_center, Nbins, maxdist):
     for it, qlm in enumerate(qlms):
         pqQs[:,it] = product(qlm[query['i']], qlm[query['j']])
     np.add.at(hqQ, rs, pqQs)
-    return hqQ, g
+    return hqQ[:-1], g[:-1]
 
 
     
