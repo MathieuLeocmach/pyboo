@@ -229,14 +229,20 @@ def gG_l(pos, qlms, is_center, Nbins, maxdist):
     #an additional bin for the case where the distance is exactly equal to maxdist
     hqQ = np.zeros((Nbins+1, len(qlms)))
     g = np.zeros(Nbins+1, int)
+    #compute ql for all particles
+    qQ = np.array([ql(qlm) for qlm in qlms])
+    nonzero = qQ.min(0) + 1.0 > 1.0
     #spatial indexing
-    tree = KDTree(pos, 12)
-    centertree = KDTree(pos[is_center], 12)
+    tree = KDTree(pos[nonzero], 12)
+    centertree = KDTree(pos[is_center & nonzero], 12)
     #all pairs of points closer than maxdist with their distances in a record array
     query = centertree.sparse_distance_matrix(tree, maxdist, output_type='ndarray')
-    #keep only pairs where the points are distinct
-    centerindex = np.where(is_center)[0]
+    #convert in original indices
+    nonzeroindex = np.where(nonzero)[0]
+    centerindex = np.where(is_center&nonzero)[0]
     query['i'] = centerindex[query['i']]
+    query['j'] = nonzeroindex[query['j']]
+    #keep only pairs where the points are distinct
     good = query['i'] != query['j']
     query = query[good]
     #binning of distances
@@ -246,6 +252,8 @@ def gG_l(pos, qlms, is_center, Nbins, maxdist):
     pqQs = np.empty((len(rs), len(qlms)))
     for it, qlm in enumerate(qlms):
         pqQs[:,it] = product(qlm[query['i']], qlm[query['j']])
+        prodnorm = qQ[it, query['i']] * qQ[it, query['j']]
+        pqQs[:,it] /= prodnorm
     np.add.at(hqQ, rs, pqQs)
     return hqQ[:-1], g[:-1]
 
