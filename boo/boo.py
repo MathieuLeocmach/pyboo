@@ -178,7 +178,9 @@ def wl(qlm):
 def x_bonds(qlm, bonds, threshold=0.7):
     """Which bonds are crystalline? If the cross product of their qlm is larger than the threshold."""
     return bonds[
-        product(qlm[bonds[:,0]], qlm[bonds[:,0]]) > threshold
+        product(qlm[bonds[:,0]], qlm[bonds[:,1]])/(
+            ql(qlm[bonds[:,0]]) * ql(qlm[bonds[:,1]])
+        ) > threshold
     ]
 
 def x_particles(qlm, bonds, value_thr=0.7, nb_thr=7):

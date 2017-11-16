@@ -89,9 +89,9 @@ Coarse-graining can be done with `coarsegrain_qlm(qlm, bonds, inside)`. The para
 
 The similarity between the symetry and the orientation of two neighbourhoods can be estimated by the normalized scalar product
 
-$$s_\ell(i,j) = \frac{4\pi}{2\ell + 1} \sum_{m=-\ell}^{\ell} q_{\ell m}(i) q_{\ell m}^{*}(j)$$
+$$s_\ell(i,j) = \frac{4\pi}{2\ell + 1} \frac{\sum_{m=-\ell}^{\ell} q_{\ell m}(i) q_{\ell m}^{*}(j)}{q_\ell(i) q_\ell(j)}$$
 
-This quantity is the result of `boo_product(qlm1, qlm2)`.
+This quantity is the result of `product(qlm1, qlm2)` divided by `ql(qlm1) * ql(qlm2)`.
 
 Typical use: when $s_6(i,j)$ is larger than a threshold value (typically 0.7) the bond can be considered crystalline. A particle is considered crystalline when it has at least 7 crystalline bonds. See Auer & Frenkel, J.Chem.Phys. (2004) doi: 10.1063/1.1638740. This procedure is implemented in `x_particles(qlm, bonds)`.
 
