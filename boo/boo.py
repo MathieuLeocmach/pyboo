@@ -130,12 +130,13 @@ def product(qlm1, qlm2, prod):
     prod[0] *= 4*np.pi/(2*l+1)
     
     
-#@jit(nopython=True) #Results are wrong with jit!
+@jit#(nopython=True)
 def ql(qlm):
     """Second order rotational invariant of the bond orientational order of l-fold symmetry
     $$ q_\ell = \sqrt{\frac{4\pi}{2l+1} \sum_{m=-\ell}^{\ell} |q_{\ell m}|^2 } $$"""
     q = abs2(qlm[...,0])
-    q += 2*abs2(qlm[...,1:]).sum(-1)
+    for m in range(1, qlm.shape[-1]):
+        q += 2 * abs2(qlm[...,m])
     l = qlm.shape[-1]-1
     return np.sqrt(4*np.pi / (2*l+1) * q)
     
