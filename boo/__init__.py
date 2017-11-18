@@ -7,5 +7,5 @@
  
 __version__ = "1.0.0"
  
-from boo import vect2Ylm, single_pos2qlm, bonds2qlm, coarsegrain_qlm, product, ql, wl
-from boo import x_bonds, x_particles, crystallinity, gG_l
+from .boo import vect2Ylm, single_pos2qlm, bonds2qlm, coarsegrain_qlm, product, ql, wl
+from .boo import x_bonds, x_particles, crystallinity, gG_l
