@@ -199,7 +199,7 @@ def wl(qlm):
 def bond_normed_product(qlm, bonds):
     q = ql(qlm)
     return product(qlm[bonds[:,0]], qlm[bonds[:,1]])/(
-            q[bonds[:,0] * q[bonds[:,1]
+            q[bonds[:,0]] * q[bonds[:,1]]
         )
     
 def x_bonds(qlm, bonds, threshold=0.7):
