@@ -29,7 +29,7 @@ def abs2(x):
     
 @vectorize(['float64(float64,float64,float64)'])
 def periodify(u,v,period=-1.0):
-    """Given two arrays of points in a d-dimentional space with periodic boundary conditions, find the shortest vector between each pair. period can be a float or an array of floats of length d. Negative periods indicate no periodicity in this dimension.
+    """Given two arrays of points in a d-dimensional space with periodic boundary conditions, find the shortest vector between each pair. period can be a float or an array of floats of length d. Negative periods indicate no periodicity in this dimension.
     
     Implemented using algorithm C4 of Deiters 2013 doi:10.1524/zpch.2013.0311"""
     diff = v - u
@@ -39,7 +39,7 @@ def periodify(u,v,period=-1.0):
         
 
 def cart2sph(cartesian):
-    """Convert Cartesian coordinates [[x,y,z],] to spherical coordinates [[r,phi,theta],]
+    """Convert Cartesian coordinates :math:`[[x,y,z],]` to spherical coordinates :math:`[[r,phi,theta],]`
 phi is cologitudinal and theta azimutal"""
     spherical = np.zeros_like(cartesian)
     #distances
@@ -74,7 +74,18 @@ def single_pos2qlm(pos, i, ngb_indices, l=6):
     return vect2Ylm(vectors, l).mean(-1)
     
 def bonds2qlm(pos, bonds, l=6, periods=-1.0):
-    """Returns the qlm for every particle"""
+    """Compute bond orientational order for each particle.
+    
+    Parameters
+    ----------
+    pos : (N,3) array of floats
+        Spatial coordinates
+    bonds : (M,2) array of integers. 
+        Bonds are supposed unique and bidirectional.
+    l : int 
+        A positive even integer indicating the order of symmetry.
+    periods : float or (3) floats. 
+        Negative periods indicate no periodicity in this dimension."""
     qlm = np.zeros((len(pos), l+1), np.complex128)
     #spherical harmonic coefficients for each bond
     Ylm = vect2Ylm(
@@ -94,8 +105,18 @@ def bonds2qlm(pos, bonds, l=6, periods=-1.0):
     return qlm / np.maximum(1, Nngb)[:,None]
     
 def ngbs2qlm(pos, ngbs, l=6, periods=-1):
-    """Compute qlm from an array of exactly M neighbours per particle. 
-    Invalid neighbours (negative indices) give zero contribution."""
+    """Compute bond orientational order supposing at most M neigbours per particles.
+    
+    Parameters
+    ----------
+    pos : (N,3) array of floats
+        Spatial coordinates
+    ngbs : (N,M) array of int
+        Neighbour indices. Negative indices correspond to invalid neighbours and give zero contribution.
+    l : int 
+        A positive even integer indicating the order of symmetry.
+    periods : float or (3) floats. 
+        Negative periods indicate no periodicity in this dimension."""
     assert len(pos) == len(ngbs)
     qlm = np.zeros([len(pos), l+1], np.complex128)
     #eliminate neighbours with negative indices
@@ -114,8 +135,10 @@ def ngbs2qlm(pos, ngbs, l=6, periods=-1):
     return Ylm2.mean(1)
     
 def coarsegrain_qlm(qlm, bonds, inside):
-    """Coarse grain the bond orientational order on the neighbourhood of a particle
-    $$Q_{\ell m}(i) = \frac{1}{N_i+1}\left( q_{\ell m}(i) +  \sum_{j=0}^{N_i} q_{\ell m}(j)\right)$$
+    r"""Coarse grain the bond orientational order on the neighbourhood of a particle
+    
+    .. math:: Q_{\ell m}(i) = \frac{1}{N_i+1}\left( q_{\ell m}(i) +  \sum_{j=0}^{N_i} q_{\ell m}(j)\right)
+    
     See Lechner & Delago J. Chem. Phys. (2008) doi:10.1063/1.2977970
     Returns Qlm and the mask of the valid particles
     """
@@ -140,9 +163,9 @@ def coarsegrain_qlm(qlm, bonds, inside):
     #nopython=True
 )
 def product(qlm1, qlm2, prod):
-    """Product between two qlm
+    r"""Product between two qlm
     
-    $$s_\ell (i,j) = \frac{4\pi}{2\ell + 1}\sum_{m=-\ell}{\ell} q_{\ell m}(i) q_{\ell m}(j)^*$$"""
+    .. math:: s_\ell (i,j) = \frac{4\pi}{2\ell + 1}\sum_{m=-\ell}{\ell} q_{\ell m}(i) q_{\ell m}(j)^*"""
     l = qlm1.shape[0]-1
     prod[0] = (qlm1[0] * qlm2[0].conjugate()).real
     for i in range(1, len(qlm1)):
@@ -152,8 +175,9 @@ def product(qlm1, qlm2, prod):
     
 @jit#(nopython=True)
 def ql(qlm):
-    """Second order rotational invariant of the bond orientational order of l-fold symmetry
-    $$ q_\ell = \sqrt{\frac{4\pi}{2l+1} \sum_{m=-\ell}^{\ell} |q_{\ell m}|^2 } $$"""
+    r"""Second order rotational invariant of the bond orientational order of l-fold symmetry
+    
+    .. math::  q_\ell = \sqrt{\frac{4\pi}{2l+1} \sum_{m=-\ell}^{\ell} |q_{\ell m}|^2 } """
     q = abs2(qlm[...,0])
     for m in range(1, qlm.shape[-1]):
         q += 2 * abs2(qlm[...,m])
@@ -179,14 +203,15 @@ def get_w3j(l, ms):
      
 @jit
 def wl(qlm):
-    """Third order rotational invariant of the bond orientational order of l-fold symmetry
-    $$ w_\ell = \sum_{m_1+m_2+m_3=0} 
+    r"""Third order rotational invariant of the bond orientational order of l-fold symmetry
+    
+    .. math::  w_\ell = \sum_{m_1+m_2+m_3=0} 
 			\left( \begin{array}{ccc}
 				\ell & \ell & \ell \\
 				m_1 & m_2 & m_3 
 			\end{array} \right)
 			q_{\ell m_1} q_{\ell m_2} q_{\ell m_3}
-			$$"""
+			"""
     l = qlm.shape[-1]-1
     w = np.zeros(qlm.shape[:-1])
     for m1 in range(-l, l+1):
@@ -197,17 +222,20 @@ def wl(qlm):
     return w
     
 def bond_normed_product(qlm, bonds):
+    r"""Normalized cross product
+    
+    .. math:: \hat{s}_\ell (i,j) = \frac{s_\ell (i,j)}{q_\ell(i) q_\ell(j)}"""
     q = ql(qlm)
     return product(qlm[bonds[:,0]], qlm[bonds[:,1]])/(
             q[bonds[:,0]] * q[bonds[:,1]]
         )
     
 def x_bonds(qlm, bonds, threshold=0.7):
-    """Which bonds are crystalline? If the cross product of their qlm is larger than the threshold."""
+    """Which bonds are crystalline? If the normalized cross product of their qlm is larger than the threshold."""
     return bonds[bond_normed_product(qlm, bonds) > threshold]
     
 def x_ngbs(qlm, ngbs, threshold=0.7):
-    """With which neighbour does each particles has a crystalline bond? If the cross product of their qlm is larger than the threshold."""
+    """With which neighbours j does a particles i have a crystalline bond? If the normalized cross product of their qlm is larger than the threshold."""
     bonds = np.column_stack((
         np.repeat(np.arange(ngbs.shape[0]), ngbs.shape[1]),
         ngbs.ravel()
@@ -224,9 +252,9 @@ def x_particles(qlm, bonds, value_thr=0.7, nb_thr=7):
     return nb > nb_thr
     
 def crystallinity(qlm, bonds):
-    """Crystallinity parameter, see Russo & Tanaka, Sci Rep. (2012) doi:10.1038/srep00505.
+    r"""Crystallinity parameter, see Russo & Tanaka, Sci Rep. (2012) doi:10.1038/srep00505.
     
-    $$C_\ell(i) = \frac{1}{N_i} \sum_{j=0}{N_i} s_\ell (i,j)$$"""
+    .. math:: C_\ell(i) = \frac{1}{N_i} \sum_{j=0}{N_i} \hat{s}_\ell (i,j)"""
     #cross product for all bonds
     bv = bond_normed_product(qlm, bonds)
     #count number or neighbours
@@ -245,11 +273,18 @@ def gG_l(pos, qlms, is_center, Nbins, maxdist):
     then bin each quantity with respect to distance. 
     The two first sums need to be normalised by the last one.
     
-     - pos is a Nxd array of coordinates, with d the dimension of space
-     - qlms is a list of Nx(2l+1) arrays of boo coordinates for l-fold symmetry. l can be different for each item.
-     - is_center is a N array of booleans. For example all particles further away than maxdist from any edge of the box.
-     - Nbins is the number of bins along r
-     - maxdist is the maximum distance considered.
+    Parameters
+    ----------
+    pos : (N,3) array of floats
+        Spatial coordinates
+    qlms : list
+        A list of (N, 2l+1) arrays of boo coordinates for l-fold symmetry. l can be different for each item.
+    is_center : (N) array of bool. 
+        For example all particles further away than maxdist from any edge of the box.
+    Nbins : int
+        The number of bins along r
+    maxdist : float
+        The maximum distance considered.
      
      Periodic boundary conditions are not supported."""
     for qlm in qlms:
