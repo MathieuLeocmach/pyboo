@@ -196,13 +196,24 @@ def wl(qlm):
                 w += get_w3j(l, np.array([m1, m2, m3])) * (get_qlm(qlm, m1) * get_qlm(qlm, m2) * get_qlm(qlm, m3)).real
     return w
     
+def bond_normed_product(qlm, bonds):
+    return product(qlm[bonds[:,0]], qlm[bonds[:,1]])/(
+            ql(qlm[bonds[:,0]]) * ql(qlm[bonds[:,1]])
+        )
+    
 def x_bonds(qlm, bonds, threshold=0.7):
     """Which bonds are crystalline? If the cross product of their qlm is larger than the threshold."""
-    return bonds[
-        product(qlm[bonds[:,0]], qlm[bonds[:,1]])/(
-            ql(qlm[bonds[:,0]]) * ql(qlm[bonds[:,1]])
-        ) > threshold
-    ]
+    return bonds[bond_normed_product(qlm, bonds) > threshold]
+    
+def x_ngbs(qlm, ngbs, threshold=0.7):
+    """With which neighbour does each particles has a crystalline bond? If the cross product of their qlm is larger than the threshold."""
+    bonds = np.column_stack((
+        np.repeat(np.arange(ngbs.shape[0]), ngbs.shape[1]),
+        ngbs.ravel()
+        ))
+    good = ngbs >= 0
+    xn = (bond_normed_product(qlm, bonds) > threshold).reshape(ngbs.shape)
+    return xn & good
 
 def x_particles(qlm, bonds, value_thr=0.7, nb_thr=7):
     """Which particles are crystalline? If they have more than nb_thr crystalline bonds."""
