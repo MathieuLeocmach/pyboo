@@ -94,7 +94,12 @@ setup(
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
     package_data={
-        'sample': ['examples/AR-Res06A_scan2_t890.xyz', 'examples/crystal-gel.ipynb'],
+        'sample': [
+            'examples/AR-Res06A_scan2_t890.xyz', 
+            'examples/crystal-gel.ipynb',
+            'examples/3d_6_0.54_0.dat',
+            'examples/periodic_glass.ipynb',
+        ],
     },
 
     # Although 'package_data' is the preferred approach, in some case you may
