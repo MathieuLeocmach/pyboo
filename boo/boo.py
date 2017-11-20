@@ -197,8 +197,9 @@ def wl(qlm):
     return w
     
 def bond_normed_product(qlm, bonds):
+    q = ql(qlm)
     return product(qlm[bonds[:,0]], qlm[bonds[:,1]])/(
-            ql(qlm[bonds[:,0]]) * ql(qlm[bonds[:,1]])
+            q[bonds[:,0] * q[bonds[:,1]
         )
     
 def x_bonds(qlm, bonds, threshold=0.7):
@@ -227,8 +228,7 @@ def crystallinity(qlm, bonds):
     
     $$C_\ell(i) = \frac{1}{N_i} \sum_{j=0}{N_i} s_\ell (i,j)$$"""
     #cross product for all bonds
-    bv = product(qlm[bonds[:,0]], qlm[bonds[:,0]])
-    bv /= (ql(qlm[bonds[:,0]]) * ql(qlm[bonds[:,1]]))
+    bv = bond_normed_product(qlm, bonds)
     #count number or neighbours
     nb = np.zeros(len(qlm), int)
     np.add.at(nb, bonds.ravel(), 1)
