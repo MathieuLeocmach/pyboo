@@ -93,6 +93,26 @@ def bonds2qlm(pos, bonds, l=6, periods=-1.0):
     np.add.at(Nngb, bonds.ravel(), 1)
     return qlm / np.maximum(1, Nngb)[:,None]
     
+def ngbs2qlm(pos, ngbs, l=6, periods=-1):
+    """Compute qlm from an array of exactly M neighbours per particle. 
+    Invalid neighbours (negative indices) give zero contribution."""
+    assert len(pos) == len(ngbs)
+    qlm = np.zeros([len(pos), l+1], np.complex128)
+    #eliminate neighbours with negative indices
+    good = ngbs >= 0
+    #spherical harmonic coefficients for each bond
+    Ylm = vect2Ylm(
+        periodify(
+            pos[np.repeat(np.arange(ngbs.shape[0]), ngbs.shape[-1])[good.ravel()]],
+            pos[ngbs[good].ravel()],
+            periods
+        ),
+        l
+    ).T
+    Ylm2 = np.zeros([ngbs.shape[0], ngbs.shape[1], l+1], np.complex128)
+    Ylm2.reshape((ngbs.shape[0]*ngbs.shape[1], l+1))[good.ravel()] = Ylm
+    return Ylm2.mean(1)
+    
 def coarsegrain_qlm(qlm, bonds, inside):
     """Coarse grain the bond orientational order on the neighbourhood of a particle
     $$Q_{\ell m}(i) = \frac{1}{N_i+1}\left( q_{\ell m}(i) +  \sum_{j=0}^{N_i} q_{\ell m}(j)\right)$$
