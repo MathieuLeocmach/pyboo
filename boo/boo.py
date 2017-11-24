@@ -43,6 +43,10 @@ Parameters
 u,v : array_like float
 period : float or an array of floats of length d.
     Negative periods indicate no periodicity in this dimension.
+
+Returns
+----------
+array_like float
 """
     diff = v - u
     if period <= 0:
@@ -100,8 +104,13 @@ bonds : (M,2) array of integers.
     Bonds are supposed unique and bidirectional.
 l : int
     A positive even integer indicating the order of symmetry.
-periods : float or (3) floats.
+periods : float or (3) array of floats.
     Negative periods indicate no periodicity in this dimension.
+
+Returns
+----------
+qlm : (N,2*l+1) array of complex
+    Tensorial order parameter of order l for each particle
 """
     qlm = np.zeros((len(pos), l+1), np.complex128)
     #spherical harmonic coefficients for each bond
@@ -136,6 +145,11 @@ l : int
     A positive even integer indicating the order of symmetry.
 periods : float or (3) floats.
     Negative periods indicate no periodicity in this dimension.
+
+Returns
+----------
+qlm : (N,2*l+1) array of complex
+    Tensorial order parameter of order l for each particle
 """
     assert len(pos) == len(ngbs)
     #eliminate neighbours with negative indices
@@ -157,10 +171,26 @@ def coarsegrain_qlm(qlm, bonds, inside):
     r"""
 Coarse grain the bond orientational order on the neighbourhood of a particle
 
-.. math:: Q_{\ell m}(i) = \frac{1}{N_i+1}\left(q_{\ell m}(i) +  \sum_{j=0}^{N_i} q_{\ell m}(j)\right)
+.. math:: Q_{\ell m}(i) = \frac{1}{N_i+1}\left(q_{\ell m}(i) + \sum_{j=0}^{N_i} q_{\ell m}(j)\right)
 
 See Lechner & Delago J. Chem. Phys. (2008) doi:10.1063/1.2977970
 Returns Qlm and the mask of the valid particles
+
+Parameters
+----------
+qlm : (N,2*l+1) array of complex
+    Tensorial order parameter of order l for each particle
+bonds : (M,2) array of integers
+    Bonds are supposed unique and bidirectional.
+inside : (N) array of booleans
+    Particles that are outside are not added and contaminate their neighbours.
+
+Returns
+----------
+Qlm : (N,2*l+1) array of complex
+    Coarse-grained tensorial order parameter of order l for each particle
+inside2 : (N) array of booleans
+    Particles that are inside and have no neighbour outside
 """
     #Valid particles must be valid themselves have only valid neighbours
     inside2 = np.copy(inside)
@@ -201,6 +231,15 @@ def ql(qlm):
 Second order rotational invariant of the bond orientational order of l-fold symmetry
 
 .. math::  q_\ell = \sqrt{\frac{4\pi}{2l+1} \sum_{m=-\ell}^{\ell} |q_{\ell m}|^2 }
+
+Parameters
+----------
+qlm : (N,2*l+1) array of complex
+    Tensorial order parameter of order l for each particle
+
+Returns
+----------
+(N) array of float
 """
     q = abs2(qlm[..., 0])
     for m in range(1, qlm.shape[-1]):
@@ -235,6 +274,15 @@ Third order rotational invariant of the bond orientational order of l-fold symme
 			m_1 & m_2 & m_3
 		\end{array} \right)
 		q_{\ell m_1} q_{\ell m_2} q_{\ell m_3}
+
+Parameters
+----------
+qlm : (N,2*l+1) array of complex
+    Tensorial order parameter of order l for each particle
+
+Returns
+----------
+(N) array of float
 """
     l = qlm.shape[-1]-1
     w = np.zeros(qlm.shape[:-1])
@@ -252,6 +300,17 @@ def bond_normed_product(qlm, bonds):
 Normalized cross product
 
 .. math:: \hat{s}_\ell (i,j) = \frac{s_\ell (i,j)}{q_\ell(i) q_\ell(j)}
+
+Parameters
+----------
+qlm : (N,2*l+1) array of complex
+    Tensorial order parameter of order l for each particle
+bonds : (M,2) array of integers
+    Bonds are supposed unique and bidirectional.
+
+Returns
+----------
+(M) array of float
 """
     q = ql(qlm)
     return product(qlm[bonds[:, 0]], qlm[bonds[:, 1]])/(
@@ -262,6 +321,20 @@ def x_bonds(qlm, bonds, threshold=0.7):
     """
 Which bonds are crystalline?
 If the normalized cross product of their qlm is larger than the threshold.
+
+Parameters
+----------
+qlm : (N,2*l+1) array of complex
+    Tensorial order parameter of order l for each particle
+bonds : (M,2) array of integers
+    Bonds are supposed unique and bidirectional.
+threshold : float
+    Lower bound of the normed product for a bond to be considered crystalline. Default 0.7.
+
+Returns
+----------
+(P,2) array of integers
+    The bonds that are crystalline. P <= M
 """
     return bonds[bond_normed_product(qlm, bonds) > threshold]
 
@@ -269,6 +342,20 @@ def x_ngbs(qlm, ngbs, threshold=0.7):
     """
 With which neighbours j does a particles i have a crystalline bond?
 If the normalized cross product of their qlm is larger than the threshold.
+
+Parameters
+----------
+qlm : (N,2*l+1) array of complex
+    Tensorial order parameter of order l for each particle
+ngbs : (N,M) array of int
+    Neighbour indices.
+    Negative indices correspond to invalid neighbours and give zero contribution.
+threshold : float
+    Lower bound of the normed product for a bond to be considered crystalline. Default 0.7.
+
+Returns
+----------
+(N,M) array of booleans
 """
     bonds = np.column_stack((
         np.repeat(np.arange(ngbs.shape[0]), ngbs.shape[1]),
@@ -295,7 +382,7 @@ nb_thr : int
 
 Returns
 ----------
-(N) array of bools
+(N) array of booleans
 """
     xb = x_bonds(qlm, bonds, threshold=value_thr)
     nb = np.zeros(len(qlm), int)
