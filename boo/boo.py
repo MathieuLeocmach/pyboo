@@ -206,6 +206,44 @@ inside2 : (N) array of booleans
     Qlm[np.bitwise_not(inside2)] = 0
     return Qlm / np.maximum(1, Nngb)[:, None], inside2
 
+def coarsegrain_qlm_ngbs(qlm, ngbs, inside):
+    r"""
+Coarse grain the bond orientational order on the neighbourhood of a particle
+
+.. math:: Q_{\ell m}(i) = \frac{1}{N_i+1}\left(q_{\ell m}(i) + \sum_{j=0}^{N_i} q_{\ell m}(j)\right)
+
+See Lechner & Delago J. Chem. Phys. (2008) doi:10.1063/1.2977970
+Returns Qlm and the mask of the valid particles
+
+Parameters
+----------
+qlm : (N,2*l+1) array of complex
+    Tensorial order parameter of order l for each particle
+ngbs : (N,M) array of int
+    Neighbour indices.
+    Negative indices correspond to invalid neighbours and give zero contribution.
+inside : (N) array of booleans
+    Particles that are outside are not added and contaminate their neighbours.
+
+Returns
+----------
+Qlm : (N,2*l+1) array of complex
+    Coarse-grained tensorial order parameter of order l for each particle
+inside2 : (N) array of booleans
+    Particles that are inside and have no neighbour outside
+"""
+    assert len(qlm) == len(ngbs)
+    #eliminate neighbours with negative indices
+    good = ngbs >= 0
+    #Valid particles must be valid themselves have only valid neighbours
+    inside2 = np.copy(inside)
+    inside2 = inside & np.all(np.where(good, inside[ngbs], True), axis=-1)
+    #sum
+    Qlm = np.zeros((ngbs.shape[0], ngbs.shape[1], qlm.shape[-1]), qlm.dtype)
+    flatshape = (ngbs.shape[0]*ngbs.shape[1], qlm.shape[-1])
+    Qlm.reshape(flatshape)[good.ravel()] = qlm[ngbs].reshape(flatshape)[good.ravel()]
+    return (Qlm.sum(1) + qlm) / (1 + ngbs.shape[1]), inside2
+
 
 @guvectorize(
     ['void(complex128[:], complex128[:], float64[:])'],
