@@ -48,6 +48,8 @@ The library is agnostic on how the bonds were determined. Possible choices are (
  
 Other libraries have very efficient implementations of theses methods. See for example :class:`scipy.spatial.KDTree` for fast spatial query or :class:`scipy.spatial.Delaunay`.
 
+Alternatively Pyboo can take as input arrays of M nearest neighbours. For example in a dense assembly of hard spheres, one expects the important structures (FCC, HCP, icosahedron) to be made of a central particle and its 12 neighbours. The 12 first neighbours are stored in ``ngbs``, a (N,12) array of indicies. If for a reason or an other some particles have less than 12 neighbours, the remaining slots can be filled by negative values, e.g. -1.
+
 Spherical harmonics
 -------------------
 
@@ -64,6 +66,8 @@ where the average is taken over all the bonds. More locally, each particle :math
 where there are :math:`N_i` bonds starting from :math:`i`. We call the :math:`q_{\ell m}` coefficients the local tensorial bond orientational order parameter.
 
 The function :meth:`~boo.boo.bonds2qlm` computes the :math:`q_{\ell m}` coefficients for the :math:`\ell`-fold symetry. The extra parameter `periods` allows to do so in periodic boundary conditions.
+
+The function :meth:`~boo.boo.ngbs2qlm` does the same from a M neighbours array. For all particles :math:`N_i=M`, even for particles with less than M neighbours.
 
 Invarients
 ----------
@@ -95,7 +99,7 @@ It is possible to coarse-grain the tensorial bond orientational order to get mor
 
 here the central particle is included in the sum.
 
-Coarse-graining can be done with :meth:`~boo.boo.coarsegrain_qlm`. The parameter ``inside`` is a (N) array of booleans indicating particles where the original :math:`q_{\ell m}` coefficients were truthfully determined. Counter examples (where ``inside`` takes the value ``False``) are particles that were too close to one edge of the experimental window, so that some of their neighbours were not dectected, causing a incomplete bond set. Coarse-grained invariants :math:`Q_\ell` and :math:`W_\ell` can be computed in the same way by :meth:`~boo.boo.ql` and :meth:`~boo.boo.wl` respectively.
+Coarse-graining can be done with :meth:`~boo.boo.coarsegrain_qlm` or :meth:`~boo.boo.coarsegrain_qlm_ngbs`. The parameter ``inside`` is a (N) array of booleans indicating particles where the original :math:`q_{\ell m}` coefficients were truthfully determined. Counter examples (where ``inside`` takes the value ``False``) are particles that were too close to one edge of the experimental window, so that some of their neighbours were not dectected, causing a incomplete bond set. Coarse-grained invariants :math:`Q_\ell` and :math:`W_\ell` can be computed in the same way by :meth:`~boo.boo.ql` and :meth:`~boo.boo.wl` respectively.
 
 Cross product
 -------------
