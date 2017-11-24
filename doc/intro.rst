@@ -1,7 +1,7 @@
 Introduction to Pyboo
 =====================
 
-A Python package to compute bond orientational order parameters as defined by Steinhardt Physical Review B (1983) doi:10.1103/PhysRevB.28.784.
+A Python package to compute bond orientational order parameters as defined by Steinhardt Physical Review B (1983) `doi:10.1103/PhysRevB.28.784 <https://doi.org/10.1103/PhysRevB.28.784>`_.
 
 Steinhardt's bond orientational order parameter is a popular method (>20k citations of the original paper) to identify local symmetries in an assembly of particles in 3D. It can be used in particle-based simulations (typically molecular dynamics, brownian dynamics, monte-carlo, etc.) or in particle-tracking experiments (colloids, granular materials) where the coordinates of all particles are known.
 
@@ -82,14 +82,14 @@ The tensorial :math:`q_{\ell m}` coefficients are dependent of the orientation o
 			\end{array} \right)
 			q_{\ell m_1} q_{\ell m_2} q_{\ell m_3}
 
-  where the term in brackets is the Wigner 3-j symbol. For example :math:`w_6` allows to disctiminate icosahedral structures, see Leocmach & Tanaka, Nature Com. (2012) doi: 10.1038/ncomms1974.
+  where the term in brackets is the Wigner 3-j symbol. For example :math:`w_6` allows to disctiminate icosahedral structures, see Leocmach & Tanaka, Nature Com. (2012) `doi: 10.1038/ncomms1974 <https://doi.org/10.1038/ncomms1974>`_.
 
 Invarients can be computed respectively by :meth:`~boo.boo.ql` and :meth:`~boo.boo.wl`.
 
 Coarse-graining
 ---------------
 
-It is possible to coarse-grain the tensorial bond orientational order to get more information about the second shell of neighbours and thus discriminate better crystal structures, see Lechner & Delago J. Chem. Phys. (2008) doi:10.1063/1.2977970:
+It is possible to coarse-grain the tensorial bond orientational order to get more information about the second shell of neighbours and thus discriminate better crystal structures, see Lechner & Delago J. Chem. Phys. (2008) `doi:10.1063/1.2977970 <https://doi.org/10.1063/1.2977970>`_:
 
 .. math::  Q_{\ell m}(i) = \frac{1}{N_i+1}\left( q_{\ell m}(i) +  \sum_{j=0}^{N_i} q_{\ell m}(j)\right)
 
@@ -106,9 +106,9 @@ The similarity between the symetry and the orientation of two neighbourhoods can
 
 This quantity is the result of :meth:`~boo.boo.product` divided by ``ql(qlm1) * ql(qlm2)``. The similarity between all neighbouring particles can be obtained from :meth:`~boo.boo.bond_normed_product`.
 
-Typical use: when :math:`s_6(i,j)` is larger than a threshold value (typically 0.7) the bond can be considered crystalline. A particle is considered crystalline when it has at least 7 crystalline bonds. See Auer & Frenkel, J.Chem.Phys. (2004) doi: 10.1063/1.1638740. This procedure is implemented in :meth:`~boo.boo.x_particles`.
+Typical use: when :math:`s_6(i,j)` is larger than a threshold value (typically 0.7) the bond can be considered crystalline. A particle is considered crystalline when it has at least 7 crystalline bonds. See Auer & Frenkel, J.Chem.Phys. (2004) `doi: 10.1063/1.1638740 <https://doi.org/10.1063/1.1638740>`_. This procedure is implemented in :meth:`~boo.boo.x_particles`.
 
-In a more continuous manner, the crystallinity parameter is defined as the average of the cross products over the neighbours, see Russo & Tanaka, Sci Rep. (2012) doi:10.1038/srep00505.
+In a more continuous manner, the crystallinity parameter is defined as the average of the cross products over the neighbours, see Russo & Tanaka, Sci Rep. (2012) `doi:10.1038/srep00505 <https://doi.org/10.1038/srep00505>`_.
 
 .. math:: C_\ell(i) = \frac{1}{N_i} \sum_{j=0}{N_i} s_\ell (i,j)
 
