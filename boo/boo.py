@@ -279,17 +279,45 @@ If the normalized cross product of their qlm is larger than the threshold.
     return xn & good
 
 def x_particles(qlm, bonds, value_thr=0.7, nb_thr=7):
-    """Which particles are crystalline? If they have more than nb_thr crystalline bonds."""
+    """
+Which particles are crystalline? If they have more than nb_thr crystalline bonds.
+
+Parameters
+----------
+qlm : (N,2*l+1) array of complex
+    Tensorial order parameter of order l for each particle
+bonds : (M,2) array of integers.
+    Bonds are supposed unique and bidirectional.
+value_thr : float
+    Lower bound of the normed product for a bond to be considered crystalline. Default 0.7.
+nb_thr : int
+    Minimum number of crystalline bonds for a particle to be considered crystalline.
+
+Returns
+----------
+(N) array of bools
+"""
     xb = x_bonds(qlm, bonds, threshold=value_thr)
     nb = np.zeros(len(qlm), int)
     np.add.at(nb, xb.ravel(), 1)
-    return nb > nb_thr
+    return nb >= nb_thr
 
 def crystallinity(qlm, bonds):
     r"""
 Crystallinity parameter, see Russo & Tanaka, Sci Rep. (2012) doi:10.1038/srep00505.
 
 .. math:: C_\ell(i) = \frac{1}{N_i} \sum_{j=0}{N_i} \hat{s}_\ell (i,j)
+
+Parameters
+----------
+qlm : (N,2*l+1) array of complex
+    Tensorial order parameter of order l for each particle
+bonds : (M,2) array of integers.
+    Bonds are supposed unique and bidirectional.
+
+Returns
+----------
+(N) array of floats
 """
     #cross product for all bonds
     bv = bond_normed_product(qlm, bonds)
@@ -320,7 +348,7 @@ Parameters
 pos : (N,3) array of floats
     Spatial coordinates
 qlms : list
-    A list of (N, 2l+1) arrays of boo coordinates for l-fold symmetry.
+    A list of M (N, 2l+1) arrays of boo coordinates for l-fold symmetry.
     l can be different for each item.
 is_center : (N) array of bool.
     For example all particles further away than maxdist from any edge of the box.
@@ -328,6 +356,13 @@ Nbins : int
     The number of bins along r
 maxdist : float
     The maximum distance considered.
+
+Returns
+----------
+hqQ : (Nbins, M) array of floats
+    The sum of cross products for each distance and each qlm
+g : (Nbins) array of ints
+    The number of pairs for each distance
 """
     for qlm in qlms:
         assert len(pos) == len(qlm)
