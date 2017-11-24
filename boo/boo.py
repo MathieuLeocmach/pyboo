@@ -157,9 +157,7 @@ def coarsegrain_qlm(qlm, bonds, inside):
     r"""
 Coarse grain the bond orientational order on the neighbourhood of a particle
 
-.. math:: Q_{\ell m}(i) = \frac{1}{N_i+1}\left(
-    q_{\ell m}(i) +  \sum_{j=0}^{N_i} q_{\ell m}(j)
-\right)
+.. math:: Q_{\ell m}(i) = \frac{1}{N_i+1}\left(q_{\ell m}(i) +  \sum_{j=0}^{N_i} q_{\ell m}(j)\right)
 
 See Lechner & Delago J. Chem. Phys. (2008) doi:10.1063/1.2977970
 Returns Qlm and the mask of the valid particles
@@ -188,8 +186,7 @@ def product(qlm1, qlm2, prod):
     r"""
 Product between two qlm
 
-.. math:: s_\ell (i,j) = \frac{4\pi}{2\ell + 1}
-    \sum_{m=-\ell}{\ell} q_{\ell m}(i) q_{\ell m}(j)^*
+.. math:: s_\ell (i,j) = \frac{4\pi}{2\ell + 1} \sum_{m=-\ell}{\ell} q_{\ell m}(i) q_{\ell m}(j)^*
 """
     l = qlm1.shape[0]-1
     prod[0] = (qlm1[0] * qlm2[0].conjugate()).real
