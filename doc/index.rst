@@ -9,6 +9,11 @@ Welcome to Pyboo's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   
+   intro
+   examples/crystal-gel.ipynb
+   examples/periodic_glass.ipynb
+   api/modules.rst
 
 
 
