@@ -98,9 +98,9 @@ Compute bond orientational order for each particle.
 
 Parameters
 ----------
-pos : (N,3) array of floats
+pos : (N, 3) array of floats
     Spatial coordinates
-bonds : (M,2) array of integers.
+bonds : (M, 2) array of integers.
     Bonds are supposed unique and bidirectional.
 l : int
     A positive even integer indicating the order of symmetry.
@@ -109,7 +109,7 @@ periods : float or (3) array of floats.
 
 Returns
 ----------
-qlm : (N,2*l+1) array of complex
+qlm : (N, 2*l+1) array of complex
     Tensorial order parameter of order l for each particle
 """
     qlm = np.zeros((len(pos), l+1), np.complex128)
@@ -136,9 +136,9 @@ Compute bond orientational order supposing at most M neigbours per particles.
 
 Parameters
 ----------
-pos : (N,3) array of floats
+pos : (N, 3) array of floats
     Spatial coordinates
-ngbs : (N,M) array of int
+ngbs : (N, k) array of int
     Neighbour indices.
     Negative indices correspond to invalid neighbours and give zero contribution.
 l : int
@@ -148,7 +148,7 @@ periods : float or (3) floats.
 
 Returns
 ----------
-qlm : (N,2*l+1) array of complex
+qlm : (N, 2*l+1) array of complex
     Tensorial order parameter of order l for each particle
 """
     assert len(pos) == len(ngbs)
@@ -178,16 +178,16 @@ Returns Qlm and the mask of the valid particles
 
 Parameters
 ----------
-qlm : (N,2*l+1) array of complex
+qlm : (N, 2*l+1) array of complex
     Tensorial order parameter of order l for each particle
-bonds : (M,2) array of integers
+bonds : (M, 2) array of integers
     Bonds are supposed unique and bidirectional.
 inside : (N) array of booleans
     Particles that are outside are not added and contaminate their neighbours.
 
 Returns
 ----------
-Qlm : (N,2*l+1) array of complex
+Qlm : (N, 2*l+1) array of complex
     Coarse-grained tensorial order parameter of order l for each particle
 inside2 : (N) array of booleans
     Particles that are inside and have no neighbour outside
@@ -217,9 +217,9 @@ Returns Qlm and the mask of the valid particles
 
 Parameters
 ----------
-qlm : (N,2*l+1) array of complex
+qlm : (N, 2*l+1) array of complex
     Tensorial order parameter of order l for each particle
-ngbs : (N,M) array of int
+ngbs : (N, k) array of int
     Neighbour indices.
     Negative indices correspond to invalid neighbours and give zero contribution.
 inside : (N) array of booleans
@@ -227,7 +227,7 @@ inside : (N) array of booleans
 
 Returns
 ----------
-Qlm : (N,2*l+1) array of complex
+Qlm : (N, 2*l+1) array of complex
     Coarse-grained tensorial order parameter of order l for each particle
 inside2 : (N) array of booleans
     Particles that are inside and have no neighbour outside
@@ -272,7 +272,7 @@ Second order rotational invariant of the bond orientational order of l-fold symm
 
 Parameters
 ----------
-qlm : (N,2*l+1) array of complex
+qlm : (N, 2*l+1) array of complex
     Tensorial order parameter of order l for each particle
 
 Returns
@@ -315,7 +315,7 @@ Third order rotational invariant of the bond orientational order of l-fold symme
 
 Parameters
 ----------
-qlm : (N,2*l+1) array of complex
+qlm : (N, 2*l+1) array of complex
     Tensorial order parameter of order l for each particle
 
 Returns
@@ -341,9 +341,9 @@ Normalized cross product
 
 Parameters
 ----------
-qlm : (N,2*l+1) array of complex
+qlm : (N, 2*l+1) array of complex
     Tensorial order parameter of order l for each particle
-bonds : (M,2) array of integers
+bonds : (M, 2) array of integers
     Bonds are supposed unique and bidirectional.
 
 Returns
@@ -362,16 +362,16 @@ If the normalized cross product of their qlm is larger than the threshold.
 
 Parameters
 ----------
-qlm : (N,2*l+1) array of complex
+qlm : (N, 2*l+1) array of complex
     Tensorial order parameter of order l for each particle
-bonds : (M,2) array of integers
+bonds : (M, 2) array of integers
     Bonds are supposed unique and bidirectional.
 threshold : float
     Lower bound of the normed product for a bond to be considered crystalline. Default 0.7.
 
 Returns
 ----------
-(P,2) array of integers
+(P, 2) array of integers
     The bonds that are crystalline. P <= M
 """
     return bonds[bond_normed_product(qlm, bonds) > threshold]
@@ -383,9 +383,9 @@ If the normalized cross product of their qlm is larger than the threshold.
 
 Parameters
 ----------
-qlm : (N,2*l+1) array of complex
+qlm : (N, 2*l+1) array of complex
     Tensorial order parameter of order l for each particle
-ngbs : (N,M) array of int
+ngbs : (N, k) array of int
     Neighbour indices.
     Negative indices correspond to invalid neighbours and give zero contribution.
 threshold : float
@@ -393,7 +393,7 @@ threshold : float
 
 Returns
 ----------
-(N,M) array of booleans
+(N, k) array of booleans
 """
     bonds = np.column_stack((
         np.repeat(np.arange(ngbs.shape[0]), ngbs.shape[1]),
@@ -409,9 +409,9 @@ Which particles are crystalline? If they have more than nb_thr crystalline bonds
 
 Parameters
 ----------
-qlm : (N,2*l+1) array of complex
+qlm : (N, 2*l+1) array of complex
     Tensorial order parameter of order l for each particle
-bonds : (M,2) array of integers.
+bonds : (M, 2) array of integers.
     Bonds are supposed unique and bidirectional.
 value_thr : float
     Lower bound of the normed product for a bond to be considered crystalline. Default 0.7.
@@ -435,9 +435,9 @@ Crystallinity parameter, see Russo & Tanaka, Sci Rep. (2012) doi:10.1038/srep005
 
 Parameters
 ----------
-qlm : (N,2*l+1) array of complex
+qlm : (N, 2*l+1) array of complex
     Tensorial order parameter of order l for each particle
-bonds : (M,2) array of integers.
+bonds : (M, 2) array of integers.
     Bonds are supposed unique and bidirectional.
 
 Returns
@@ -470,7 +470,7 @@ Periodic boundary conditions are not supported.
 
 Parameters
 ----------
-pos : (N,3) array of floats
+pos : (N, 3) array of floats
     Spatial coordinates
 qlms : list
     A list of M (N, 2l+1) arrays of boo coordinates for l-fold symmetry.
