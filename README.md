@@ -33,13 +33,6 @@ You can install with pip:
     pip install pyboo
 
 
-## Input
+## Documentation
 
-The present library takes as input a (N, 3) array of float coordinates named `pos` and a (M, 2) array of integers named `bonds` that defines the bond network. If `bonds` contains the couple (10,55) it means that there is a bond between the particles which coordinates can be found at `pos[10]` and `pos[55]`. The bonds are supposed unique and bidirectional, therefore if the bond (10, 55) is in `bonds`, the bond (55, 10) exists *implicitely* and should not be part of `bonds`.
-
-The library is agnostic on how the bonds were determined. Possible choices are (among others):
- - two particles closer than a maximum distance,
- - the k nearest neighbours of a particle,
- - Delaunay triangulation.
- 
-Other libraries have very efficient implementations of theses methods. See for example `scipy.spatial.KDTree` for fast spatial query or `scipy.spatial.Delaunay`.
+Documentation is avaiable on Readthedocs: [http://pyboo.readthedocs.io]
