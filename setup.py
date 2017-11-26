@@ -88,6 +88,7 @@ setup(
     extras_require={
         'dev': ['check-manifest'],
         'test': ['pytest'],
+        'doc': ['sphinx', 'nbsphinx'],
     },
 
     # If there are data files included in your packages that need to be
