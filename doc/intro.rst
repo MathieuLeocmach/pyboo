@@ -18,7 +18,9 @@ Please cite Pyboo and it's author(s) in any scientific publication using this so
         pyboo, 
         title={Pyboo: A Python package to compute bond orientational order parameters},
         author={Mathieu Leocmach}, 
-        year={2017}
+        year={2017},
+        doi={10.5281/zenodo.1066568},
+        url={https://github.com/MathieuLeocmach/pyboo}
     }
 
 Contact
@@ -39,16 +41,15 @@ You can install with pip: ::
 Input
 -----
 
-The present library takes as input a (N,3) array of float coordinates named ``pos`` and a (M,2) array of integers named ``bonds`` that defines the bond network. If ``bonds`` contains the couple (10,55) it means that there is a bond between the particles which coordinates can be found at ``pos[10]`` and ``pos[55]``. The bonds are supposed unique and bidirectional, therefore if the bond (10,55) is in ``bonds``, the bond (55,10) exists *implicitely* and should not be part of ``bonds``.
+The present library takes as input a (N, 3) array of float coordinates named ``pos`` and a (M, 2) array of integers named ``bonds`` that defines the bond network. If ``bonds`` contains the couple (10, 55) it means that there is a bond between the particles which coordinates can be found at ``pos[10]`` and ``pos[55]``. The bonds are supposed unique and bidirectional, therefore if the bond (10, 55) is in ``bonds``, the bond (55, 10) exists *implicitely* and should not be part of ``bonds``.
 
 The library is agnostic on how the bonds were determined. Possible choices are (among others):
  - two particles closer than a maximum distance,
- - the k nearest neighbours of a particle,
  - Delaunay triangulation.
  
 Other libraries have very efficient implementations of theses methods. See for example :class:`scipy.spatial.KDTree` for fast spatial query or :class:`scipy.spatial.Delaunay`.
 
-Alternatively Pyboo can take as input arrays of M nearest neighbours. For example in a dense assembly of hard spheres, one expects the important structures (FCC, HCP, icosahedron) to be made of a central particle and its 12 neighbours. The 12 first neighbours are stored in ``ngbs``, a (N,12) array of indicies. If for a reason or an other some particles have less than 12 neighbours, the remaining slots can be filled by negative values, e.g. -1.
+Alternatively Pyboo can take as input arrays of k nearest neighbours (that can also be obtained from :class:`scipy.spatial.KDTree`). For example in a dense assembly of hard spheres, one expects the important structures (FCC, HCP, icosahedron) to be made of a central particle and its 12 neighbours. The k=12 first neighbours are stored in ``ngbs``, a (N, 12) array of indicies. If for a reason or an other some particles have less than 12 neighbours, the remaining slots can be filled by negative values, e.g. -1.
 
 Spherical harmonics
 -------------------
@@ -67,7 +68,7 @@ where there are :math:`N_i` bonds starting from :math:`i`. We call the :math:`q_
 
 The function :meth:`~boo.boo.bonds2qlm` computes the :math:`q_{\ell m}` coefficients for the :math:`\ell`-fold symetry. The extra parameter `periods` allows to do so in periodic boundary conditions.
 
-The function :meth:`~boo.boo.ngbs2qlm` does the same from a M neighbours array. For all particles :math:`N_i=M`, even for particles with less than M neighbours.
+The function :meth:`~boo.boo.ngbs2qlm` does the same from a k neighbours array. For all particles :math:`N_i=k`, even for particles with less than k neighbours.
 
 Invarients
 ----------

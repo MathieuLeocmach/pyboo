@@ -9,12 +9,16 @@ This code is under GPL 3.0 licence. See LICENCE file.
 
 Please cite Pyboo and it's author(s) in any scientific publication using this software.
 
+```
 @misc{
     pyboo, 
     title={Pyboo: A Python package to compute bond orientational order parameters},
     author={Mathieu Leocmach}, 
-    year={2017}
+    year={2017},
+    doi={10.5281/zenodo.1066568},
+    url={https://github.com/MathieuLeocmach/pyboo}
 }
+```
 
 Contact
     Mathieu LEOCMACH, Institut Lumière Matière, UMR-CNRS 5306, Lyon, France
@@ -31,7 +35,7 @@ You can install with pip:
 
 ## Input
 
-The present library takes as input a (N,3) array of float coordinates named `pos` and a (M,2) array of integers named `bonds` that defines the bond network. If `bonds` contains the couple (10,55) it means that there is a bond between the particles which coordinates can be found at `pos[10]` and `pos[55]`. The bonds are supposed unique and bidirectional, therefore if the bond (10,55) is in `bonds`, the bond (55,10) exists *implicitely* and should not be part of `bonds`.
+The present library takes as input a (N, 3) array of float coordinates named `pos` and a (M, 2) array of integers named `bonds` that defines the bond network. If `bonds` contains the couple (10,55) it means that there is a bond between the particles which coordinates can be found at `pos[10]` and `pos[55]`. The bonds are supposed unique and bidirectional, therefore if the bond (10, 55) is in `bonds`, the bond (55, 10) exists *implicitely* and should not be part of `bonds`.
 
 The library is agnostic on how the bonds were determined. Possible choices are (among others):
  - two particles closer than a maximum distance,
