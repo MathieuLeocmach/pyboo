@@ -1,6 +1,7 @@
 from math import sqrt
 import numpy as np
 import pytest
+from scipy.spatial import cKDTree as KDTree
 from . import boo
 
 
@@ -99,3 +100,31 @@ def test_bcc9():
         0.62853936105470865,
         0.0034385344925653301,
         0.50917507721731547)
+        
+def test_crystal_gel():
+    """Experimental data from a crystallizing gel."""
+    pos = np.loadtxt('examples/AR-Res06A_scan2_t890.xyz', skiprows=1)
+    maxbondlength = 12.5
+    #spatial indexing
+    tree = KDTree(pos, 12)
+    #query
+    bonds = tree.query_pairs(maxbondlength, output_type='ndarray')
+    inside = np.all((pos - pos.min(0) > maxbondlength) & (pos.max() - pos > maxbondlength), -1)
+    #number of neighbours per particle
+    Nngb = np.zeros(len(pos), int)
+    np.add.at(Nngb, bonds.ravel(), 1)
+    inside[Nngb<4] = False
+    #tensorial boo
+    q6m = boo.bonds2qlm(pos, bonds, l=6)
+    q4m = boo.bonds2qlm(pos, bonds, l=4)
+    #coarse-graining
+    Q6m, inside2 = boo.coarsegrain_qlm(q6m, bonds, inside)
+    Q4m, inside3 = boo.coarsegrain_qlm(q4m, bonds, inside)
+    assert np.all(inside2 == inside3)
+    #crystals
+    xpos = boo.x_particles(q6m, bonds)
+    assert xpos.sum() == 14188
+    #surface particles
+    surf = boo.x_particles(q6m, bonds, nb_thr=2) & np.bitwise_not(xpos)
+    assert surf.sum() == 9288
+    
