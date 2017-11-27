@@ -1,7 +1,8 @@
-from math import sqrt
+from math import sqrt, floor
 import numpy as np
 import pytest
 from scipy.spatial import cKDTree as KDTree
+from numba import jit
 from . import boo
 
 
@@ -16,6 +17,49 @@ def bonds2ngbs(bonds, nb_particles=None):
         ngbs[a, np.where(ngbs[a] == -1)[0][0]] = b
         ngbs[b, np.where(ngbs[b] == -1)[0][0]] = a
     return ngbs
+
+
+@jit(nopython=True) #numba to speed up our brute force approach
+def periodic_neighbours(pos, maxdist, L):
+    maxdistsq = maxdist**2
+    rL = 1./L
+    bonds = []
+    dists = []
+    for i in range(len(pos)-1):
+        for j in range(i+1, len(pos)):
+            distsq = 0
+            for d in range(pos.shape[1]):
+                diff = pos[i,d] - pos[j,d]
+                diff -= L * floor(diff * rL + 0.5)
+                distsq += diff*diff
+            if distsq < maxdistsq:
+                bonds.append(i)
+                bonds.append(j)
+                dists.append(distsq)
+    return np.array(bonds, np.int64).reshape((len(dists), 2)), np.sqrt(np.array(dists, np.float64))
+
+
+
+@jit(nopython=True) #numba to speed up our brute force approach
+def shortest_bonds2ngbs(bonds, dists, N, Nngb=12):
+    """Convert from bonds to neighbour array (at most Nngb neighbours)"""
+    ngbs = np.full((N, Nngb), -1, np.int64)
+    nngbs = np.zeros(N, np.int64)
+    #sort bonds by increasing length to be able to use first-in-first-served
+    sbonds = bonds[np.argsort(dists)]
+    for i in range(len(sbonds)):
+        a = sbonds[i,0]
+        b = sbonds[i,1]
+        if nngbs[a]< ngbs.shape[1]:
+            ngbs[a, nngbs[a]] = b
+            nngbs[a] += 1
+        if nngbs[b]< ngbs.shape[1]:
+            ngbs[b, nngbs[b]] = a
+            nngbs[b] += 1
+    return ngbs
+
+
+
 
 def known_structure_test(pos, bonds, q6, w6, q4):
     """Generic test for known structures"""
@@ -127,4 +171,30 @@ def test_crystal_gel():
     #surface particles
     surf = boo.x_particles(q6m, bonds, nb_thr=2) & np.bitwise_not(xpos)
     assert surf.sum() == 9288
-    
+
+def test_periodic_glass():
+    """Monte-Carlo simulation data of a polydisperse hard sphere glass."""
+    #prepare input
+    L = 203.
+    xyzr = np.loadtxt('examples/3d_6_0.54_0.dat')
+    radius = xyzr[:, -1]
+    pos = xyzr[:, :-1]
+    #bond network (oversized bond length)
+    maxbondlength = 15.
+    bonds, dists = periodic_neighbours(pos, maxbondlength, L)
+    #12 closest (surface distance) neighbours
+    drij = dists - (radius[bonds[:, 0]] + radius[bonds[:, 1]])
+    ngbs = shortest_bonds2ngbs(bonds, drij, len(pos))
+    #tensorial boo
+    q6m = boo.ngbs2qlm(pos, ngbs, l=6, periods=L)
+    q4m = boo.ngbs2qlm(pos, ngbs, l=4, periods=L)
+    #crystals
+    xpos = boo.x_ngbs(q6m, ngbs).sum(-1) > 6
+    assert xpos.sum() == 22
+    #surface particles
+    surf = (boo.x_ngbs(q6m, ngbs).sum(-1) > 2) & np.bitwise_not(xpos)
+    assert surf.sum() == 748
+    #icosahedra
+    w6 = boo.wl(q6m)
+    ico = w6 < -0.028
+    assert ico.sum() == 111
