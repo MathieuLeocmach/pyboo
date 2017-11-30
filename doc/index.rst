@@ -6,6 +6,8 @@
 Welcome to Pyboo's documentation!
 =================================
 
+A Python package to compute bond orientational order parameters as defined by Steinhardt Physical Review B (1983) `doi:10.1103/PhysRevB.28.784 <https://doi.org/10.1103/PhysRevB.28.784>`_.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
