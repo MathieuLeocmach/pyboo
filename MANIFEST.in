@@ -1,2 +1,2 @@
-include *.md LICENCE
+include *.md LICENSE
 recursive-include boo/examples *.ipynb *.xyz *.dat
