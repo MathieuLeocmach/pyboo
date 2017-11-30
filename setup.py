@@ -35,7 +35,7 @@ setup(
 
     # Author details
     author='Mathieu Leocmach',
-    author_email='mathieu.leocmach AT univ-lyon1 in France',
+    author_email='mathieu.leocmach@univ-lyon1 in France',
 
     # Choose your license
     license='GPL',
